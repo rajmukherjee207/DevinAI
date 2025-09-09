@@ -1,67 +1,125 @@
-# Website UI Tests - DaveAI
 
-This project contains Selenium UI automation tests for the website:
-https://www.iamdave.ai
 
----
+project_root/
+│
+│
+├── tests/
+│   │── test_reqres_api.py (run)
+│   │── test_ui_iamdave.py (run)
+│   └── __pycache__/  (X)
+│
+└── Readme.txt
 
-## How to Run the Tests
 
-1. Create and activate a Python virtual environment (recommended).
-   Windows:
-       python -m venv venv
-       venv\Scripts\activate
+test_reqres_api.py
 
-   macOS / Linux:
-       python3 -m venv venv
-       source venv/bin/activate
 
-2. Install required dependencies:
-       pip install -r requirements.txt
+How to Run the Tests
 
-3. Run all tests:
-       pytest -v
+Open Command Prompt.
 
-4. Run a specific test file:
-       pytest -v tests/test_ui_iamdave.py
+Go to your project folder:
 
-5. Run only smoke tests (logo presence check):
-       pytest -m smoke -v
+cd path\to\your\project
 
----
 
-## Dependencies
-
-List these inside requirements.txt:
+Run all tests with pytest:
 
 pytest
+
+
+To run a single test file:
+
+pytest tests\test_reqres_api.py
+
+Dependencies
+
+Create a file requirements.txt with:
+
+pytest
+requests
+
+
+Install them using:
+
+pip install pytest
+
+Test Design 
+
+I used pytest because it is simple and powerful.
+
+Tests are written for Reqres API.
+
+Each test checks:
+
+✅ Success response (200)
+
+✅ Data exists and correct
+
+✅ Error handling (404, 400)
+
+If network blocks API (401), test will skip.
+
+
+
+# Website UI Tests - DaveAI
+
+test_ui_iamdave.py
+How to Run the Tests
+1. Install dependencies
+
+First install requirements:
+
+pip install -r requirements.txt
+
+2. Run all tests
+
+From project root folder:
+
+pytest
+
+3. Run API tests only
+pytest tests\test_reqres_api.py
+
+4. Run UI tests only
+pytest tests\test_ui_iamdave.py
+
+Dependencies
+pytest
+requests
 selenium
-webdriver-manager
+webdriver-manager 
 
-(Optional)
-pytest-html  # if you want HTML reports
+install one by one:
 
----
+pip install pytest requests selenium webdriver-manager
 
-## Test Design Choices
 
-- **Setup/Teardown**
-  A pytest fixture starts Chrome before tests and quits after tests.
+👉 Make sure you have Google Chrome browser installed.
 
-- **Wait Strategies**
-  - Global implicit wait (5s).
-  - Explicit waits for dynamic elements (WebDriverWait + ExpectedConditions).
+Test Design Explanation
 
-- **Test Cases**
-  1. Verify homepage loads and title contains "DaveAI".
-  2. Verify the logo is visible.
-  3. Navigate to About Us page and verify URL contains "about-us".
-  4. Verify a heading (`h1`) is displayed on the homepage.
-  5. Fill and submit the "Book Demo" form, assert redirect to /thank-you.
+API tests (Reqres)
 
-- **Resilience**
-  JS click is used to avoid sticky headers.
-  Iframe detection for the Book Demo form.
+Validate 200 success and data exists.
+
+Validate correct content (id, email).
+
+Validate error handling (404, 400).
+
+If network blocks API (401), test skips.
+
+UI tests (iamdave.ai)
+
+Check homepage loads with correct title.
+
+Check logo is present.
+
+Navigate to About Us page and verify URL.
+
+Check a heading appears on homepage.
+
+Fill and submit Book Demo form → wait for Thank You page.
   Consent/cookie popups handled if present.
 
 ---
