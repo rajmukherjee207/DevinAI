@@ -66,4 +66,4 @@ pytest-html  # if you want HTML reports
 
 ---
 
-Author: [Your Name]
+Author: Raj Mukherjee
