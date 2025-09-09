@@ -4,37 +4,45 @@ import pytest
 BASE = "https://reqres.in/api"
 
 
+def _skip_if_unauthorized(status_code: int):
+    """If your network blocks external calls and returns 401, skip the test instead of failing."""
+    if status_code == 401:
+        pytest.skip("Received 401 from environment (proxy/firewall). Skipping in restricted network.")
+
+
 def test_list_users_status_and_has_data():
+    """Validate a successful 200 and that response contains a 'data' list."""
     resp = requests.get(f"{BASE}/users")
-    assert resp.status_code in [200, 401]
-    if resp.status_code == 200:  # only validate JSON if API is reachable
-        j = resp.json()
-        assert "data" in j
-        assert isinstance(j["data"], list)
+    _skip_if_unauthorized(resp.status_code)
+    assert resp.status_code == 200
+    j = resp.json()
+    assert "data" in j and isinstance(j["data"], list)
 
 
 def test_get_single_user_valid_and_content():
+    """Validate 200 + content: id==2 and email key exists."""
     resp = requests.get(f"{BASE}/users/2")
-    assert resp.status_code in [200, 401]
-    if resp.status_code == 200:
-        j = resp.json()
-        assert j["data"]["id"] == 2
-        assert "email" in j["data"]
+    _skip_if_unauthorized(resp.status_code)
+    assert resp.status_code == 200
+    j = resp.json()
+    assert j["data"]["id"] == 2
+    assert "email" in j["data"] and j["data"]["email"].endswith("@reqres.in")
 
 
 def test_get_single_user_not_found():
-    resp = requests.get(f"{BASE}/users/23")
-    assert resp.status_code in [404, 401]  # 404 normally, 401 in blocked env
-    if resp.status_code == 404:
-        j = resp.json()
-        assert j == {}  # Reqres returns empty object for not found
+    """Validate error handling: non-existent user returns 404 and empty object."""
+    resp = requests.get(f"{BASE}/users/23")  # known non-existent id
+    _skip_if_unauthorized(resp.status_code)
+    assert resp.status_code == 404
+    # Reqres returns {}, not an error structure
+    assert resp.json() == {}
 
 
 def test_login_missing_password_shows_error():
-    payload = {"email": "peter@klaven"}
+    """Validate error handling: missing password => 400 + error message."""
+    payload = {"email": "peter@klaven"}  # no password
     resp = requests.post(f"{BASE}/login", json=payload)
-    assert resp.status_code in [400, 401]  # 400 normally, 401 in blocked env
-    if resp.status_code == 400:
-        j = resp.json()
-        assert "error" in j
-        assert j["error"] == "Missing password"
+    _skip_if_unauthorized(resp.status_code)
+    assert resp.status_code == 400
+    j = resp.json()
+    assert j.get("error") == "Missing password"
